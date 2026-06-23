@@ -1,7 +1,8 @@
 import { Request, Response } from "express";
 import { Competitor } from "../models/Competitor";
+import { runScraperAgent } from "../agents/scraperAgent";
 
-// GET /api/competitors - get all competitors
+// GET /api/competitors
 export const getCompetitors = async (req: Request, res: Response) => {
   try {
     const competitors = await Competitor.find({ isActive: true });
@@ -11,7 +12,7 @@ export const getCompetitors = async (req: Request, res: Response) => {
   }
 };
 
-// POST /api/competitors - add a new competitor
+// POST /api/competitors
 export const createCompetitor = async (req: Request, res: Response) => {
   try {
     const { name, website, description } = req.body;
@@ -29,7 +30,7 @@ export const createCompetitor = async (req: Request, res: Response) => {
   }
 };
 
-// DELETE /api/competitors/:id - remove a competitor
+// DELETE /api/competitors/:id
 export const deleteCompetitor = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
@@ -37,5 +38,33 @@ export const deleteCompetitor = async (req: Request, res: Response) => {
     res.json({ success: true, message: "Competitor removed" });
   } catch (error) {
     res.status(500).json({ success: false, error: "Failed to delete competitor" });
+  }
+};
+
+// POST /api/competitors/:id/scrape
+export const scrapeCompetitor = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+
+    const competitor = await Competitor.findById(id);
+    if (!competitor) {
+      return res.status(404).json({ success: false, error: "Competitor not found" });
+    }
+
+    console.log(`🚀 Starting scrape for ${competitor.name}...`);
+    const result = await runScraperAgent(
+      competitor._id.toString(),
+      competitor.name,
+      competitor.website
+    );
+
+    if (result.success) {
+      await Competitor.findByIdAndUpdate(id, { lastScraped: new Date() });
+      res.json({ success: true, data: result.data });
+    } else {
+      res.status(500).json({ success: false, error: result.error });
+    }
+  } catch (error) {
+    res.status(500).json({ success: false, error: "Scraping failed" });
   }
 };
