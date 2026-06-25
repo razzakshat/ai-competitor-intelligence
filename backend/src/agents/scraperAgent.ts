@@ -14,11 +14,9 @@ export const runScraperAgent = async (
   website: string
 ): Promise<ScraperResult> => {
   try {
-    // Step 1: Scrape the website
     const rawContent = await scrapeWebsite(website);
     const contentHash = generateContentHash(rawContent);
 
-    // Step 2: Use AI to extract intelligence
     console.log(`🤖 Analyzing ${competitorName} with AI...`);
 
     const prompt = `You are a business intelligence analyst. Analyze this competitor website content and extract key information.
@@ -38,18 +36,19 @@ Extract the following information and respond in valid JSON format only:
   "targetAudience": "who this product/service is designed for"
 }
 
-Respond with JSON only. No explanation. No markdown.`;
+Respond with JSON only. No explanation. No markdown. No code blocks.`;
 
     const response = await llm.invoke([{ role: "user", content: prompt }]);
-
-    // Step 3: Parse the AI response
     const responseText = response.content as string;
 
     let extractedIntelligence;
     try {
-      extractedIntelligence = JSON.parse(responseText);
+      const cleaned = responseText
+        .replace(/```json/g, "")
+        .replace(/```/g, "")
+        .trim();
+      extractedIntelligence = JSON.parse(cleaned);
     } catch {
-      // If JSON parsing fails, create a basic structure
       extractedIntelligence = {
         summary: responseText,
         keyFeatures: [],
@@ -59,7 +58,6 @@ Respond with JSON only. No explanation. No markdown.`;
       };
     }
 
-    // Step 4: Build the result
     const scrapedData: ScrapedData = {
       competitorId,
       competitorName,
