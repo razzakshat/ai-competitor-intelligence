@@ -14,3 +14,12 @@ router.delete("/:id", deleteCompetitor);
 router.post("/:id/scrape", scrapeCompetitor);
 export default router;
 
+import {
+  getCompetitors,
+  createCompetitor,
+  deleteCompetitor,
+  scrapeCompetitor,
+  getBriefings,
+} from "../api/competitors";
+
+router.get("/briefings", getBriefings);

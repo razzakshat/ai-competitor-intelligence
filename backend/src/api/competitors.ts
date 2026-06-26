@@ -68,3 +68,17 @@ export const scrapeCompetitor = async (req: Request, res: Response) => {
     res.status(500).json({ success: false, error: "Scraping failed" });
   }
 };
+
+import { Briefing } from "../models/Briefing";
+
+// GET /api/briefings
+export const getBriefings = async (req: Request, res: Response) => {
+  try {
+    const briefings = await Briefing.find()
+      .sort({ createdAt: -1 })
+      .limit(20);
+    res.json({ success: true, data: briefings });
+  } catch (error) {
+    res.status(500).json({ success: false, error: "Failed to fetch briefings" });
+  }
+};

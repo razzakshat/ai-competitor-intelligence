@@ -5,6 +5,7 @@ import { runStrategistAgent, BriefingResult } from "../agents/strategistAgent";
 import { storeIntelligence } from "./ragService";
 import { Briefing } from "../models/Briefing";
 import { ScrapedData } from "../types";
+import { sendCompetitorAlert } from "./slackService";
 
 // Define state using Annotation (new LangGraph 1.x syntax)
 const WorkflowAnnotation = Annotation.Root({
@@ -67,6 +68,7 @@ const strategizeNode = async (state: WorkflowState): Promise<Partial<WorkflowSta
 const saveBriefingNode = async (state: WorkflowState): Promise<Partial<WorkflowState>> => {
   console.log(`\n🔄 [Node 5] Saving briefing to MongoDB...`);
   if (!state.briefing) return { error: "No briefing to save" };
+
   const briefingDoc = new Briefing({
     competitorId: state.competitorId,
     competitorName: state.competitorName,
@@ -76,8 +78,20 @@ const saveBriefingNode = async (state: WorkflowState): Promise<Partial<WorkflowS
     recommendations: state.briefing.recommendations,
     significance: state.briefing.significance,
   });
+
   await briefingDoc.save();
   console.log(`✅ Briefing saved to MongoDB`);
+
+  // Send Slack alert
+  await sendCompetitorAlert(
+    state.competitorName,
+    state.briefing.summary,
+    state.briefing.changes,
+    state.briefing.strategicInsights,
+    state.briefing.recommendations,
+    state.briefing.significance
+  );
+
   return {};
 };
 
