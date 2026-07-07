@@ -1,8 +1,9 @@
 import { Request, Response } from "express";
 import { Competitor } from "../models/Competitor";
+import { Briefing } from "../models/Briefing";
 import { runScraperAgent } from "../agents/scraperAgent";
+import { runCompetitorWorkflow } from "../services/workflowService";
 
-// GET /api/competitors
 export const getCompetitors = async (req: Request, res: Response) => {
   try {
     const competitors = await Competitor.find({ isActive: true });
@@ -12,25 +13,20 @@ export const getCompetitors = async (req: Request, res: Response) => {
   }
 };
 
-// POST /api/competitors
 export const createCompetitor = async (req: Request, res: Response) => {
   try {
     const { name, website, description } = req.body;
-
     if (!name || !website) {
       return res.status(400).json({ success: false, error: "Name and website are required" });
     }
-
     const competitor = new Competitor({ name, website, description });
     await competitor.save();
-
     res.status(201).json({ success: true, data: competitor });
   } catch (error) {
     res.status(500).json({ success: false, error: "Failed to create competitor" });
   }
 };
 
-// DELETE /api/competitors/:id
 export const deleteCompetitor = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
@@ -41,23 +37,18 @@ export const deleteCompetitor = async (req: Request, res: Response) => {
   }
 };
 
-// POST /api/competitors/:id/scrape
 export const scrapeCompetitor = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-
     const competitor = await Competitor.findById(id);
     if (!competitor) {
       return res.status(404).json({ success: false, error: "Competitor not found" });
     }
-
-    console.log(`🚀 Starting scrape for ${competitor.name}...`);
     const result = await runScraperAgent(
       competitor._id.toString(),
       competitor.name,
       competitor.website
     );
-
     if (result.success) {
       await Competitor.findByIdAndUpdate(id, { lastScraped: new Date() });
       res.json({ success: true, data: result.data });
@@ -69,14 +60,28 @@ export const scrapeCompetitor = async (req: Request, res: Response) => {
   }
 };
 
-import { Briefing } from "../models/Briefing";
+export const analyzeCompetitor = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const competitor = await Competitor.findById(id);
+    if (!competitor) {
+      return res.status(404).json({ success: false, error: "Competitor not found" });
+    }
+    await runCompetitorWorkflow(
+      competitor._id.toString(),
+      competitor.name,
+      competitor.website
+    );
+    res.json({ success: true, message: "Workflow complete" });
+  } catch (error: any) {
+    console.error("Workflow error:", error);
+    res.status(500).json({ success: false, error: `Workflow failed: ${error.message || error}` });
+  }
+};
 
-// GET /api/briefings
 export const getBriefings = async (req: Request, res: Response) => {
   try {
-    const briefings = await Briefing.find()
-      .sort({ createdAt: -1 })
-      .limit(20);
+    const briefings = await Briefing.find().sort({ createdAt: -1 }).limit(20);
     res.json({ success: true, data: briefings });
   } catch (error) {
     res.status(500).json({ success: false, error: "Failed to fetch briefings" });
