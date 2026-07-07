@@ -26,7 +26,7 @@ app.use("/api/competitors", competitorRoutes);
 
 // Health check
 app.get("/health", (req, res) => {
-  res.json({ status: "ok", message: "AI Competitor Intelligence API running" });
+  res.json({ status: "ok", message: "AI Competitor Intelligence API running - DIAGNOSTICS_V1" });
 });
 
 // Start server
