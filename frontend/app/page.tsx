@@ -23,9 +23,12 @@ export default function Dashboard() {
   const [tab, setTab] = useState<"competitors" | "briefings">("competitors");
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [workspace, setWorkspace] = useState<string>("default");
+  const [workspace, setWorkspace] = useState<string>("");
+  const [workspaceInput, setWorkspaceInput] = useState("");
+  const [isWorkspaceSet, setIsWorkspaceSet] = useState(false);
 
   const loadData = async (isSilent = false) => {
+    if (!workspace) return; // Do not fetch until workspace is set
     if (!isSilent) setLoading(true);
     try {
       const [comps, briefs] = await Promise.all([
@@ -45,19 +48,27 @@ export default function Dashboard() {
   // Initialize workspace from localStorage on mount
   useEffect(() => {
     if (typeof window !== "undefined") {
-      const saved = localStorage.getItem("competitor_workspace") || "default";
-      setWorkspace(saved);
+      const saved = localStorage.getItem("competitor_workspace");
+      if (saved) {
+        setWorkspace(saved);
+        setWorkspaceInput(saved);
+        setIsWorkspaceSet(true);
+      }
     }
   }, []);
 
   // Reload data whenever workspace changes
   useEffect(() => {
-    loadData();
+    if (workspace) {
+      loadData();
+    }
   }, [workspace]);
 
   const handleWorkspaceChange = (newWorkspace: string) => {
     const clean = newWorkspace.trim() || "default";
     setWorkspace(clean);
+    setWorkspaceInput(clean);
+    setIsWorkspaceSet(true);
     if (typeof window !== "undefined") {
       localStorage.setItem("competitor_workspace", clean);
     }
@@ -72,6 +83,61 @@ export default function Dashboard() {
   const lastUpdated = competitors.length > 0 
     ? new Date(Math.max(...competitors.map(c => c.lastScraped ? new Date(c.lastScraped).getTime() : 0))) 
     : null;
+
+  if (!isWorkspaceSet) {
+    return (
+      <main className="min-h-screen bg-[#030712] bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-indigo-950/40 via-[#030712] to-[#030712] flex items-center justify-center p-4 relative overflow-hidden">
+        {/* Decorative Grid */}
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#1f293708_1px,transparent_1px),linear-gradient(to_bottom,#1f293708_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none" />
+        <div className="absolute w-[400px] h-[400px] rounded-full bg-indigo-600/10 blur-[100px] pointer-events-none" />
+
+        <div className="max-w-md w-full relative z-10 bg-[#0b0f19]/40 backdrop-blur-xl border border-indigo-950/60 p-8 rounded-2xl shadow-2xl space-y-6 text-center group">
+          {/* Top border glow */}
+          <div className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-indigo-500/50 to-transparent" />
+          
+          <div className="flex flex-col items-center space-y-2">
+            <div className="p-3 rounded-2xl bg-indigo-500/10 text-indigo-400">
+              <BrainCircuit className="h-8 w-8 animate-pulse" />
+            </div>
+            <h2 className="text-2xl font-extrabold text-white tracking-tight">AI Competitor Intelligence</h2>
+            <p className="text-xs text-slate-400">Access your private competitor monitoring matrix.</p>
+          </div>
+
+          <form onSubmit={(e) => { e.preventDefault(); handleWorkspaceChange(workspaceInput); }} className="space-y-4 text-left">
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold text-slate-300 uppercase tracking-wider">Workspace Name</label>
+              <input
+                type="text"
+                required
+                value={workspaceInput}
+                onChange={(e) => setWorkspaceInput(e.target.value)}
+                placeholder="e.g. SoapCompany, Personal"
+                className="w-full px-4 py-2.5 bg-slate-950/60 border border-indigo-950/50 text-white placeholder-slate-600 focus:border-indigo-500/60 focus:ring-1 focus:ring-indigo-500/30 rounded-xl transition-all font-semibold"
+              />
+            </div>
+            <button
+              type="submit"
+              className="w-full flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 rounded-xl cursor-pointer shadow-[0_0_15px_rgba(99,102,241,0.25)] hover:shadow-[0_0_20px_rgba(99,102,241,0.4)] transition-all"
+            >
+              Enter Workspace
+            </button>
+          </form>
+
+          <div className="relative flex items-center justify-center py-2">
+            <div className="border-t border-indigo-950/40 w-full absolute" />
+            <span className="bg-[#0b0f19] px-3 text-[10px] text-slate-500 uppercase tracking-wider relative z-10">Or</span>
+          </div>
+
+          <button
+            onClick={() => handleWorkspaceChange("default")}
+            className="w-full text-xs font-medium text-indigo-400 hover:text-indigo-300 transition-all cursor-pointer hover:underline"
+          >
+            Access Demo Workspace (default)
+          </button>
+        </div>
+      </main>
+    );
+  }
 
   return (
     <main className="min-h-screen bg-[#030712] bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-indigo-950/40 via-[#030712] to-[#030712] relative overflow-hidden px-4 py-8 sm:px-6 lg:px-8">
