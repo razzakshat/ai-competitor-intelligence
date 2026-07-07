@@ -8,20 +8,41 @@ const CHROMA_URL = process.env.CHROMA_URL || "http://localhost:8000";
 
 let vectorStore: Chroma | null = null;
 
+// Helper to create a custom ChromaClient matching the CHROMA_URL
+const createChromaClient = () => {
+  try {
+    const parsedUrl = new URL(CHROMA_URL);
+    const ssl = parsedUrl.protocol === "https:";
+    const host = parsedUrl.hostname;
+    const port = parsedUrl.port ? parseInt(parsedUrl.port, 10) : (ssl ? 443 : 80);
+    
+    return new ChromaClient({
+      host,
+      port,
+      ssl
+    });
+  } catch (error) {
+    console.error("Failed to parse CHROMA_URL, falling back to default ChromaClient:", error);
+    return new ChromaClient();
+  }
+};
+
 // Get or create the vector store
 export const getVectorStore = async (): Promise<Chroma> => {
   if (!vectorStore) {
+    const chromaClient = createChromaClient();
     vectorStore = await Chroma.fromExistingCollection(
       getEmbeddings(),
       {
         collectionName: COLLECTION_NAME,
-        url: CHROMA_URL,
+        index: chromaClient,
       }
-    ).catch(async () => {
+    ).catch(async (error: any) => {
+      console.log(`Collection doesn't exist yet or failed to get (error: ${error.message}), creating it...`);
       // Collection doesn't exist yet — create it
       return new Chroma(getEmbeddings(), {
         collectionName: COLLECTION_NAME,
-        url: CHROMA_URL,
+        index: chromaClient,
       });
     });
   }
