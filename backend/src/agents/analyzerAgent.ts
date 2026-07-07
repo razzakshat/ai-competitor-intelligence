@@ -2,12 +2,6 @@ import { ChatGroq } from "@langchain/groq";
 import { retrieveIntelligence } from "../services/ragService";
 import { ScrapedData } from "../types";
 
-const llm = new ChatGroq({
-  model: "llama-3.3-70b-versatile",
-  apiKey: process.env.GROQ_API_KEY,
-  temperature: 0.3,
-});
-
 export interface AnalysisResult {
   hasSignificantChanges: boolean;
   changes: string;
@@ -19,6 +13,12 @@ export const runAnalyzerAgent = async (
   newData: ScrapedData
 ): Promise<AnalysisResult> => {
   try {
+    const llm = new ChatGroq({
+      model: "llama-3.3-70b-versatile",
+      apiKey: process.env.GROQ_API_KEY,
+      temperature: 0.3,
+    });
+
     console.log(`🔍 Analyzing changes for ${newData.competitorName}...`);
 
     const historicalContext = await retrieveIntelligence(
@@ -42,18 +42,17 @@ Target Audience: ${newData.extractedIntelligence.targetAudience}
 HISTORICAL CONTEXT:
 ${historicalContext}
 
-Analyze and respond in valid JSON only. No markdown. No code blocks:
+IMPORTANT RULES:
+- If the historical context does not mention "${newData.competitorName}" by name, treat this as a NEW competitor and set hasSignificantChanges to TRUE and significance to "high"
+- Only say no changes if the historical context explicitly contains previous data about "${newData.competitorName}"
+
+Respond in valid JSON only. No markdown. No code blocks:
 {
   "hasSignificantChanges": true or false,
-  "changes": "describe what specifically changed, or 'No significant changes detected'",
+  "changes": "describe what changed or 'New competitor detected for first time'",
   "significance": "low" or "medium" or "high",
   "summary": "2 sentence summary of current competitive position"
-}
-
-Significance guide:
-- high: pricing changes, new major features, market pivot
-- medium: new content, minor features, messaging updates
-- low: cosmetic changes, no real changes`;
+}`;
 
     const response = await llm.invoke([{ role: "user", content: prompt }]);
     const responseText = response.content as string;

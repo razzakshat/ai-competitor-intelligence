@@ -2,18 +2,18 @@ import { ChatGroq } from "@langchain/groq";
 import { scrapeWebsite, generateContentHash } from "../services/scraperService";
 import { ScrapedData, ScraperResult } from "../types";
 
-const llm = new ChatGroq({
-  model: "llama-3.3-70b-versatile",
-  apiKey: process.env.GROQ_API_KEY,
-  temperature: 0.3,
-});
-
 export const runScraperAgent = async (
   competitorId: string,
   competitorName: string,
   website: string
 ): Promise<ScraperResult> => {
   try {
+    const llm = new ChatGroq({
+      model: "llama-3.3-70b-versatile",
+      apiKey: process.env.GROQ_API_KEY,
+      temperature: 0.3,
+    });
+
     const rawContent = await scrapeWebsite(website);
     const contentHash = generateContentHash(rawContent);
 

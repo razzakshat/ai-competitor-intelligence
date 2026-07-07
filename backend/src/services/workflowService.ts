@@ -3,9 +3,9 @@ import { runScraperAgent } from "../agents/scraperAgent";
 import { runAnalyzerAgent, AnalysisResult } from "../agents/analyzerAgent";
 import { runStrategistAgent, BriefingResult } from "../agents/strategistAgent";
 import { storeIntelligence } from "./ragService";
+import { sendCompetitorAlert } from "./slackService";
 import { Briefing } from "../models/Briefing";
 import { ScrapedData } from "../types";
-import { sendCompetitorAlert } from "./slackService";
 
 // Define state using Annotation (new LangGraph 1.x syntax)
 const WorkflowAnnotation = Annotation.Root({
@@ -47,6 +47,27 @@ const storeNode = async (state: WorkflowState): Promise<Partial<WorkflowState>> 
 const analyzeNode = async (state: WorkflowState): Promise<Partial<WorkflowState>> => {
   console.log(`\n🔄 [Node 3] Analyzing changes...`);
   if (!state.scrapedData) return { error: "No data to analyze" };
+
+  // Check if this competitor has been scraped before
+  const existingBriefings = await Briefing.find({ 
+    competitorId: state.competitorId 
+  }).limit(1);
+
+  const isFirstTime = existingBriefings.length === 0;
+
+  if (isFirstTime) {
+    console.log(`🆕 First time seeing ${state.competitorName} — forcing high significance`);
+    return {
+      analysis: {
+        hasSignificantChanges: true,
+        changes: `New competitor detected for the first time: ${state.competitorName}`,
+        significance: "high",
+        summary: state.scrapedData.extractedIntelligence.summary,
+      },
+      shouldGenerateBriefing: true,
+    };
+  }
+
   const analysis = await runAnalyzerAgent(state.scrapedData);
   return {
     analysis,
@@ -69,30 +90,41 @@ const saveBriefingNode = async (state: WorkflowState): Promise<Partial<WorkflowS
   console.log(`\n🔄 [Node 5] Saving briefing to MongoDB...`);
   if (!state.briefing) return { error: "No briefing to save" };
 
-  const briefingDoc = new Briefing({
-    competitorId: state.competitorId,
-    competitorName: state.competitorName,
-    summary: state.briefing.summary,
-    changes: state.briefing.changes,
-    strategicInsights: state.briefing.strategicInsights,
-    recommendations: state.briefing.recommendations,
-    significance: state.briefing.significance,
-  });
+  try {
+    const briefing = state.briefing as BriefingResult;
+    
+    console.log("📝 Briefing data:", JSON.stringify(briefing, null, 2));
 
-  await briefingDoc.save();
-  console.log(`✅ Briefing saved to MongoDB`);
+    const briefingDoc = new Briefing({
+      competitorId: state.competitorId,
+      competitorName: state.competitorName,
+      summary: briefing.summary || "No summary",
+      changes: briefing.changes || "No changes",
+      strategicInsights: briefing.strategicInsights || "No insights",
+      recommendations: Array.isArray(briefing.recommendations) 
+        ? briefing.recommendations.join("\n") 
+        : briefing.recommendations || "No recommendations",
+      significance: briefing.significance || "medium",
+    });
 
-  // Send Slack alert
-  await sendCompetitorAlert(
-    state.competitorName,
-    state.briefing.summary,
-    state.briefing.changes,
-    state.briefing.strategicInsights,
-    state.briefing.recommendations,
-    state.briefing.significance
-  );
+    await briefingDoc.save();
+    console.log(`✅ Briefing saved to MongoDB`);
 
-  return {};
+    await sendCompetitorAlert(
+      state.competitorName,
+      briefing.summary || "No summary",
+      briefing.changes || "No changes",
+      briefing.strategicInsights || "No insights",
+      briefing.recommendations || "No recommendations",
+      briefing.significance || "medium"
+    );
+
+    return {};
+  } catch (error: any) {
+    console.error(`❌ Save failed:`, error.message);
+    console.error(`❌ Full error:`, error);
+    return { error: error.message };
+  }
 };
 
 // Decision function

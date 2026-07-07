@@ -3,12 +3,6 @@ import { retrieveIntelligence } from "../services/ragService";
 import { ScrapedData } from "../types";
 import { AnalysisResult } from "./analyzerAgent";
 
-const llm = new ChatGroq({
-  model: "llama-3.3-70b-versatile",
-  apiKey: process.env.GROQ_API_KEY,
-  temperature: 0.7,
-});
-
 export interface BriefingResult {
   summary: string;
   changes: string;
@@ -22,6 +16,12 @@ export const runStrategistAgent = async (
   analysis: AnalysisResult
 ): Promise<BriefingResult> => {
   try {
+    const llm = new ChatGroq({
+      model: "llama-3.3-70b-versatile",
+      apiKey: process.env.GROQ_API_KEY,
+      temperature: 0.7,
+    });
+
     console.log(`🧠 Generating strategic briefing for ${competitor.competitorName}...`);
 
     const marketContext = await retrieveIntelligence(

@@ -5,6 +5,7 @@ import {
   deleteCompetitor,
   scrapeCompetitor,
   getBriefings,
+  analyzeCompetitor,
 } from "../api/competitors";
 
 const router = Router();
@@ -14,5 +15,6 @@ router.get("/", getCompetitors);
 router.post("/", createCompetitor);
 router.delete("/:id", deleteCompetitor);
 router.post("/:id/scrape", scrapeCompetitor);
+router.post("/:id/analyze", analyzeCompetitor);
 
 export default router;
