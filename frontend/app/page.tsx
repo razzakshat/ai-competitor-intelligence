@@ -23,6 +23,7 @@ export default function Dashboard() {
   const [tab, setTab] = useState<"competitors" | "briefings">("competitors");
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [workspace, setWorkspace] = useState<string>("default");
 
   const loadData = async (isSilent = false) => {
     if (!isSilent) setLoading(true);
@@ -41,9 +42,26 @@ export default function Dashboard() {
     }
   };
 
+  // Initialize workspace from localStorage on mount
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("competitor_workspace") || "default";
+      setWorkspace(saved);
+    }
+  }, []);
+
+  // Reload data whenever workspace changes
   useEffect(() => {
     loadData();
-  }, []);
+  }, [workspace]);
+
+  const handleWorkspaceChange = (newWorkspace: string) => {
+    const clean = newWorkspace.trim() || "default";
+    setWorkspace(clean);
+    if (typeof window !== "undefined") {
+      localStorage.setItem("competitor_workspace", clean);
+    }
+  };
 
   const handleManualRefresh = () => {
     setRefreshing(true);
@@ -86,7 +104,25 @@ export default function Dashboard() {
             </p>
           </div>
           
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-3">
+            {/* Workspace Selector */}
+            <div className="flex items-center gap-2 bg-[#0b0f19]/80 border border-indigo-950/60 px-3 py-1.5 rounded-xl shadow-inner max-w-xs">
+              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Workspace:</span>
+              <input
+                type="text"
+                value={workspace}
+                onChange={(e) => setWorkspace(e.target.value)}
+                onBlur={() => handleWorkspaceChange(workspace)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    handleWorkspaceChange(workspace);
+                    (e.target as HTMLInputElement).blur();
+                  }
+                }}
+                className="bg-transparent border-none text-white text-xs font-semibold focus:outline-none w-28 select-all text-indigo-400 font-mono"
+              />
+            </div>
+
             <button
               onClick={handleManualRefresh}
               disabled={refreshing}

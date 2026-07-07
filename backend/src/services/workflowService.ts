@@ -12,6 +12,7 @@ const WorkflowAnnotation = Annotation.Root({
   competitorId: Annotation<string>(),
   competitorName: Annotation<string>(),
   website: Annotation<string>(),
+  userId: Annotation<string>(),
   scrapedData: Annotation<ScrapedData | undefined>(),
   analysis: Annotation<AnalysisResult | undefined>(),
   briefing: Annotation<BriefingResult | undefined>(),
@@ -50,7 +51,8 @@ const analyzeNode = async (state: WorkflowState): Promise<Partial<WorkflowState>
 
   // Check if this competitor has been scraped before
   const existingBriefings = await Briefing.find({ 
-    competitorId: state.competitorId 
+    competitorId: state.competitorId,
+    userId: state.userId
   }).limit(1);
 
   const isFirstTime = existingBriefings.length === 0;
@@ -98,6 +100,7 @@ const saveBriefingNode = async (state: WorkflowState): Promise<Partial<WorkflowS
     const briefingDoc = new Briefing({
       competitorId: state.competitorId,
       competitorName: state.competitorName,
+      userId: state.userId,
       summary: briefing.summary || "No summary",
       changes: briefing.changes || "No changes",
       strategicInsights: briefing.strategicInsights || "No insights",
@@ -163,10 +166,11 @@ export const createWorkflow = () => {
 export const runCompetitorWorkflow = async (
   competitorId: string,
   competitorName: string,
-  website: string
+  website: string,
+  userId: string = "default"
 ): Promise<void> => {
   console.log(`\n${"=".repeat(60)}`);
-  console.log(`🚀 Starting workflow for ${competitorName}`);
+  console.log(`🚀 Starting workflow for ${competitorName} (Workspace: ${userId})`);
   console.log(`${"=".repeat(60)}`);
 
   const app = createWorkflow();
@@ -175,6 +179,7 @@ export const runCompetitorWorkflow = async (
     competitorId,
     competitorName,
     website,
+    userId,
     shouldGenerateBriefing: false,
     scrapedData: undefined,
     analysis: undefined,

@@ -6,7 +6,8 @@ import { runCompetitorWorkflow } from "../services/workflowService";
 
 export const getCompetitors = async (req: Request, res: Response) => {
   try {
-    const competitors = await Competitor.find({ isActive: true });
+    const userId = (req.headers["x-user-id"] as string) || "default";
+    const competitors = await Competitor.find({ userId, isActive: true });
     res.json({ success: true, data: competitors });
   } catch (error) {
     res.status(500).json({ success: false, error: "Failed to fetch competitors" });
@@ -19,7 +20,8 @@ export const createCompetitor = async (req: Request, res: Response) => {
     if (!name || !website) {
       return res.status(400).json({ success: false, error: "Name and website are required" });
     }
-    const competitor = new Competitor({ name, website, description });
+    const userId = (req.headers["x-user-id"] as string) || "default";
+    const competitor = new Competitor({ name, website, description, userId });
     await competitor.save();
     res.status(201).json({ success: true, data: competitor });
   } catch (error) {
@@ -30,7 +32,8 @@ export const createCompetitor = async (req: Request, res: Response) => {
 export const deleteCompetitor = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    await Competitor.findByIdAndUpdate(id, { isActive: false });
+    const userId = (req.headers["x-user-id"] as string) || "default";
+    await Competitor.findOneAndUpdate({ _id: id, userId }, { isActive: false });
     res.json({ success: true, message: "Competitor removed" });
   } catch (error) {
     res.status(500).json({ success: false, error: "Failed to delete competitor" });
@@ -40,7 +43,8 @@ export const deleteCompetitor = async (req: Request, res: Response) => {
 export const scrapeCompetitor = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const competitor = await Competitor.findById(id);
+    const userId = (req.headers["x-user-id"] as string) || "default";
+    const competitor = await Competitor.findOne({ _id: id, userId });
     if (!competitor) {
       return res.status(404).json({ success: false, error: "Competitor not found" });
     }
@@ -63,14 +67,16 @@ export const scrapeCompetitor = async (req: Request, res: Response) => {
 export const analyzeCompetitor = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const competitor = await Competitor.findById(id);
+    const userId = (req.headers["x-user-id"] as string) || "default";
+    const competitor = await Competitor.findOne({ _id: id, userId });
     if (!competitor) {
       return res.status(404).json({ success: false, error: "Competitor not found" });
     }
     await runCompetitorWorkflow(
       competitor._id.toString(),
       competitor.name,
-      competitor.website
+      competitor.website,
+      userId
     );
     res.json({ success: true, message: "Workflow complete" });
   } catch (error: any) {
@@ -81,7 +87,8 @@ export const analyzeCompetitor = async (req: Request, res: Response) => {
 
 export const getBriefings = async (req: Request, res: Response) => {
   try {
-    const briefings = await Briefing.find().sort({ createdAt: -1 }).limit(20);
+    const userId = (req.headers["x-user-id"] as string) || "default";
+    const briefings = await Briefing.find({ userId }).sort({ createdAt: -1 }).limit(20);
     res.json({ success: true, data: briefings });
   } catch (error) {
     res.status(500).json({ success: false, error: "Failed to fetch briefings" });

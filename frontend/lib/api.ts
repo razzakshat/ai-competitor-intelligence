@@ -7,6 +7,15 @@ export const api = axios.create({
   headers: { "Content-Type": "application/json" },
 });
 
+// Automatically inject active workspace user-id in headers
+api.interceptors.request.use((config) => {
+  if (typeof window !== "undefined") {
+    const workspace = localStorage.getItem("competitor_workspace") || "default";
+    config.headers["x-user-id"] = workspace.trim() || "default";
+  }
+  return config;
+});
+
 export interface Competitor {
   _id: string;
   name: string;

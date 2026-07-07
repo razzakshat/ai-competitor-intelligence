@@ -4,6 +4,7 @@ export interface ICompetitor extends Document {
   name: string;
   website: string;
   description: string;
+  userId: string;
   isActive: boolean;
   lastScraped: Date | null;
   createdAt: Date;
@@ -25,6 +26,10 @@ const CompetitorSchema = new Schema<ICompetitor>(
     description: {
       type: String,
       default: "",
+    },
+    userId: {
+      type: String,
+      default: "default",
     },
     isActive: {
       type: Boolean,

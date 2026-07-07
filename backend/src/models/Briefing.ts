@@ -3,6 +3,7 @@ import mongoose, { Schema, Document } from "mongoose";
 export interface IBriefing extends Document {
   competitorId: string;
   competitorName: string;
+  userId: string;
   summary: string;
   changes: string;
   strategicInsights: string;
@@ -15,6 +16,7 @@ const BriefingSchema = new Schema<IBriefing>(
   {
     competitorId: { type: String, required: true },
     competitorName: { type: String, required: true },
+    userId: { type: String, default: "default" },
     summary: { type: String, required: true },
     changes: { type: String, default: "" },
     strategicInsights: { type: String, default: "" },
