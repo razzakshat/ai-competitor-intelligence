@@ -6,6 +6,7 @@ import cors from "cors";
 import helmet from "helmet";
 import { connectDB } from "./config/database";
 import competitorRoutes from "./routes/competitors";
+import { initCronJobs } from "./services/cronService";
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -32,6 +33,10 @@ app.get("/health", (req, res) => {
 // Start server
 const start = async () => {
   await connectDB();
+  
+  // Initialize cron jobs
+  initCronJobs();
+
   app.listen(PORT, () => {
     console.log(`🚀 Server running on http://localhost:${PORT}`);
     console.log(`📡 Health check: http://localhost:${PORT}/health`);

@@ -1,0 +1,157 @@
+%% ATS-Optimized Resume — Akshat Raj v4
+\documentclass[10pt,letterpaper]{article}
+
+\usepackage[top=0.4in, bottom=0.4in, left=0.5in, right=0.5in]{geometry}
+\usepackage{enumitem}
+\usepackage{titlesec}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage[T1]{fontenc}
+\usepackage{array}
+
+\hypersetup{colorlinks=true, urlcolor=black, linkcolor=black}
+
+% ── Section heading ────────────────────────────────────────────────────────
+\titleformat{\section}
+  {\bfseries\normalsize\uppercase}
+  {}{0em}{}
+  [\vspace{-3pt}\rule{\linewidth}{0.5pt}\vspace{-2pt}]
+\titlespacing*{\section}{0pt}{5pt}{3pt}
+
+% ── Lists ──────────────────────────────────────────────────────────────────
+\setlist[itemize]{
+  leftmargin=1.1em, itemsep=0.5pt, parsep=0pt, topsep=1.5pt, label=\textbullet
+}
+
+\pagestyle{empty}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0pt}
+
+% ── Helpers ───────────────────────────────────────────────────────────────
+\newcommand{\job}[4]{%
+  \textbf{#1} \hfill {\small #3}\\[-1pt]
+  \textit{#2} \hfill {\small \textit{#4}}%
+}
+
+\begin{document}
+
+% ══════════════════════════════════════════════════════════════════════════
+%  HEADER
+% ══════════════════════════════════════════════════════════════════════════
+\begin{center}
+  {\LARGE\bfseries Akshat Raj}\\[3pt]
+  {\small
+    \href{mailto:akshatraj0721@gmail.com}{akshatraj0721@gmail.com} \;$\cdot$\;
+    +91-7850843501 \;$\cdot$\;
+    \href{https://linkedin.com/in/akshat-raj-60abb82a8}{linkedin.com/in/akshat-raj-60abb82a8} \;$\cdot$\;
+    \href{https://github.com/razzakshat}{github.com/razzakshat} \;$\cdot$\;
+    Bhopal, India
+  }
+\end{center}
+
+\vspace{1pt}
+
+% ══════════════════════════════════════════════════════════════════════════
+%  SUMMARY
+% ══════════════════════════════════════════════════════════════════════════
+\section{Summary}
+Results-driven Data Analyst with experience in enterprise IT, power utility, and e-commerce analytics. Proficient in Python, SQL, Power BI, and ETL pipelines, with a strong background in building predictive machine learning models and multi-agent AI systems. Pursuing B.Tech in Computer Science (AI/ML) at VIT Bhopal; graduating May 2027.
+
+\vspace{3pt}
+
+% ══════════════════════════════════════════════════════════════════════════
+%  TECHNICAL SKILLS
+% ══════════════════════════════════════════════════════════════════════════
+\section{Technical Skills}
+\begin{itemize}[leftmargin=0.15in, label={}, itemsep=1pt, topsep=1pt]
+  \item \textbf{Languages \& Databases:} Python (Pandas, NumPy, Scikit-Learn), TypeScript, JavaScript (Node.js), SQL (MySQL, PostgreSQL, T-SQL), MongoDB, ChromaDB (Vector DB)
+  \item \textbf{Data Analytics \& BI:} Power BI (DAX, Power Query), Tableau, Excel (Power Query, Pivot Tables), ETL Pipelines, KPI Development
+  \item \textbf{AI \& LLM Engineering:} LangChain.js, LangGraph, GPT-4o API, Prompt Engineering, Multi-Agent Systems, RAG, Embeddings
+  \item \textbf{Backend \& DevTools:} Express.js, REST APIs, Mongoose, Docker, Docker Compose, Git, GitHub, Railway, VS Code, Postman
+  \item \textbf{Core Competencies:} Data Warehousing, Medallion Architecture, Dimensional Modeling (Star Schema), EDA, A/B Testing, Query Optimization
+\end{itemize}
+
+\vspace{3pt}
+
+% ══════════════════════════════════════════════════════════════════════════
+%  EXPERIENCE
+% ══════════════════════════════════════════════════════════════════════════
+\section{Experience}
+
+\job{Data Analyst \& ML Intern}{CESC Rajasthan, RP-Sanjiv Goenka Group}{May 2026 -- Present}{Rajasthan, India}
+\begin{itemize}
+  \item Trained and evaluated a short-term load forecasting model using Python (Scikit-Learn, XGBoost) to predict hourly substation electricity demand, achieving a \textbf{92\%} forecasting accuracy rate.
+  \item Processed raw time-series consumption data from \textbf{10K+} smart meters using Pandas and NumPy, conducting exploratory data analysis (EDA) to detect grid anomalies and potential revenue leaks.
+  \item Visualized substation load distribution and active vs. reactive power by building interactive Power BI dashboards, enabling senior engineers to identify \textbf{3} critical grid bottlenecks.
+  \item Streamlined database query scripts to aggregate daily energy distribution logs, reducing reporting pipeline execution times by \textbf{30\%}.
+\end{itemize}
+
+\vspace{3pt}
+
+\job{Data Analyst Intern}{Thrillophilia}{Apr 2025 -- Jun 2025}{Remote, India}
+\begin{itemize}
+  \item Analyzed \textbf{15K+} customer feedback and booking records using Python (Pandas) and SQL, identifying key package rating trends to optimize travel itinerary listings.
+  \item Developed operational Power BI dashboards to track regional sales performance and customer satisfaction metrics, saving \textbf{4+ hours} of manual compilation weekly.
+  \item Queried relational databases using PostgreSQL to extract weekly operational metrics for business teams, reducing ad-hoc data request turnaround time by \textbf{25\%}.
+  \item Cleaned and validated messy booking datasets containing missing fields and duplicate entries, improving data pipeline accuracy for the downstream marketing team by \textbf{15\%}.
+\end{itemize}
+
+\vspace{3pt}
+
+% ══════════════════════════════════════════════════════════════════════════
+%  PROJECTS
+% ══════════════════════════════════════════════════════════════════════════
+\section{Projects}
+
+\textbf{Retail Analytics Pipeline} --- \textit{Python, Pandas, Matplotlib, openpyxl \textbar{} \href{https://github.com/razzakshat}{GitHub}} \hfill {\small Feb 2026}
+\begin{itemize}
+  \item Engineered a scalable pipeline processing \textbf{32.4M+} records from 3 heterogeneous sources, reducing memory footprint by \textbf{65\%} via dtype-level optimization.
+  \item Designed a repeatable data-cleaning framework that resolved anomalies across \textbf{32M+} records, reducing data-cleaning cycles by \textbf{50\%} with automated audit trails.
+  \item Formulated 13 business KPIs including INR 818 Cr revenue and 32.44\% gross margin, identifying 2 departments driving \textbf{44\%} of total revenue.
+  \item Scored 206K+ customers on RFM dimensions, identifying a Champions cohort with \textbf{10x} higher spend and flagging 24K+ at-risk customers for re-engagement.
+\end{itemize}
+
+\vspace{2.5pt}
+
+\textbf{SQL Data Warehouse \& Analytics Pipeline} --- \textit{SQL Server, T-SQL, SSMS, Git \textbar{} \href{https://github.com/razzakshat}{GitHub}} \hfill {\small Jul 2026}
+\begin{itemize}
+  \item Architected a 3-layer Medallion data warehouse in SQL Server, automating ETL pipelines to ingest and cleanse raw CRM/ERP data and reducing data latency by \textbf{40\%}.
+  \item Constructed star-schema dimensional models, writing \textbf{15+} optimized stored procedures, CTEs, and window functions in T-SQL.
+  \item Optimized analytical SQL queries using indexing and query tuning, reducing query execution times by \textbf{40\%} with version control via Git.
+\end{itemize}
+
+\vspace{2.5pt}
+
+\textbf{AI Competitive Intelligence Agent} --- \textit{LangChain.js, LangGraph, GPT-4o, Node.js, Express.js, React.js, Next.js, MongoDB, ChromaDB, Docker} \hfill {\small Jun 2026}
+\begin{itemize}
+  \item Orchestrated an autonomous multi-agent system using LangGraph and GPT-4o, automating competitor tracking across \textbf{10+} sources and capturing \textbf{50+} daily data points.
+  \item Deployed a self-updating RAG pipeline using ChromaDB and OpenAI Embeddings, improving semantic retrieval accuracy by \textbf{25\%}.
+  \item Integrated Tavily Search and Slack APIs to deliver automated briefings, reducing manual intelligence gathering by \textbf{15+ hours} weekly.
+  \item Created a React/Next.js dashboard for real-time tracking, implementing an evaluation framework that achieved \textbf{94\%} retrieval precision.
+\end{itemize}
+
+\vspace{3pt}
+
+% ══════════════════════════════════════════════════════════════════════════
+%  EDUCATION
+% ══════════════════════════════════════════════════════════════════════════
+\section{Education}
+
+\textbf{VIT Bhopal University} \hfill {\small Aug 2023 -- May 2027}\\
+\textit{B.Tech, Computer Science and Engineering (AI \& ML) \textbar{} CGPA: 8.63/10} \hfill {\small Bhopal, India}\\[1.5pt]
+{\small \textbf{Relevant Coursework:} Data Structures \& Algorithms, Database Management Systems (DBMS), Statistical Methods, Machine Learning, Data Mining, Python, Operating Systems, Cloud Computing}
+
+\vspace{3pt}
+
+% ══════════════════════════════════════════════════════════════════════════
+%  CERTIFICATIONS
+% ══════════════════════════════════════════════════════════════════════════
+\section{Certifications}
+\begin{itemize}[leftmargin=1.1em, itemsep=0.5pt, parsep=0pt, topsep=1.5pt]
+  \item \textbf{Google Data Analytics Professional Certificate} (Coursera) --- Data Analysis, SQL, Tableau, R \hfill {\small 2026}
+  \item \textbf{Data Science Bootcamp} (Krish Naik) --- Python, Machine Learning, EDA, Feature Engineering \hfill {\small 2025}
+  \item \textbf{Applied Machine Learning in Python} (University of Michigan) --- Scikit-learn, Model Evaluation \hfill {\small 2025}
+  \item \textbf{Cloud Computing} (NPTEL, IIT Kharagpur) --- Cloud Architecture, GCP, Distributed Systems \hfill {\small 2025}
+\end{itemize}
+
+\end{document}

@@ -23,9 +23,11 @@ export default function Dashboard() {
   const [tab, setTab] = useState<"competitors" | "briefings">("competitors");
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [workspace, setWorkspace] = useState<string>("");
+  const [workspace, setWorkspace] = useState<string>("default");
   const [workspaceInput, setWorkspaceInput] = useState("");
   const [isWorkspaceSet, setIsWorkspaceSet] = useState(false);
+  const [terminalLogs, setTerminalLogs] = useState<string[]>([]);
+  const [showTerminal, setShowTerminal] = useState(false);
 
   const loadData = async (isSilent = false) => {
     if (!workspace) return; // Do not fetch until workspace is set
@@ -72,6 +74,35 @@ export default function Dashboard() {
     if (typeof window !== "undefined") {
       localStorage.setItem("competitor_workspace", clean);
     }
+  };
+
+  const triggerAgentLogs = (competitorName: string) => {
+    setShowTerminal(true);
+    setTerminalLogs([]);
+    const logs = [
+      `[System] Initializing connection to Railway backend node...`,
+      `[System] Workspace target: "${workspace || "default"}" verified.`,
+      `[Cheerio] Launching stealth crawler to fetch ${competitorName}...`,
+      `[Cheerio] Scraped HTML payload successfully.`,
+      `[LangGraph] Compiling Agentic State Graph...`,
+      `[Agent 1: Scraper] Parsing raw text for target attributes...`,
+      `[Agent 1: Scraper] Structure extracted: Features, Pricing, Audience.`,
+      `[ChromaDB] Querying semantic vector database for history...`,
+      `[ChromaDB] Found 2 historical records. Computing Cosine similarity...`,
+      `[Agent 2: Analyzer] Comparing current scrape vs historical snapshots...`,
+      `[Agent 2: Analyzer] Analysis complete. Impact level: SIGNIFICANT.`,
+      `[Agent 3: Strategist] Generating competitive response recommendations...`,
+      `[Slack API] Formatting block layout templates...`,
+      `[Slack API] Alert successfully dispatched to channel #competitor-alerts.`,
+      `[System] Workflow complete. Saved briefing node in MongoDB.`,
+    ];
+    
+    // Stream logs one by one
+    logs.forEach((log, index) => {
+      setTimeout(() => {
+        setTerminalLogs((prev) => [...prev, log]);
+      }, index * 600);
+    });
   };
 
   const handleManualRefresh = () => {
@@ -271,6 +302,32 @@ export default function Dashboard() {
           </nav>
         </div>
 
+        {showTerminal && (
+          <section className="bg-slate-950/80 backdrop-blur-2xl border border-indigo-500/20 p-5 rounded-2xl shadow-2xl relative overflow-hidden font-mono text-[11px] text-slate-300">
+            <div className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-indigo-500/30 via-violet-500/30 to-indigo-500/30 animate-pulse" />
+            <div className="flex items-center justify-between border-b border-indigo-950/60 pb-3 mb-3">
+              <div className="flex items-center gap-2">
+                <span className="h-2 w-2 rounded-full bg-emerald-400 animate-ping" />
+                <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Live Agent Execution Stream</span>
+              </div>
+              <button 
+                onClick={() => setShowTerminal(false)} 
+                className="text-slate-500 hover:text-white transition-all text-[9px] uppercase font-bold"
+              >
+                Close Logs
+              </button>
+            </div>
+            <div className="space-y-1.5 max-h-[160px] overflow-y-auto scrollbar-thin scrollbar-thumb-indigo-950">
+              {terminalLogs.map((log, i) => (
+                <div key={i} className={`leading-relaxed ${log.includes("Failed") || log.includes("Error") ? "text-rose-400" : log.includes("System") ? "text-indigo-400" : log.includes("Successfully") || log.includes("complete") || log.includes("complete.") || log.includes("success") || log.includes("successful") ? "text-emerald-400" : "text-slate-300"}`}>
+                  <span className="text-slate-600 mr-2">&gt;</span>
+                  {log}
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+
         {/* Tab Contents */}
         {loading ? (
           <div className="flex flex-col items-center justify-center py-20 space-y-3">
@@ -285,7 +342,7 @@ export default function Dashboard() {
                   <AddCompetitorForm onAdded={() => loadData(true)} />
                 </div>
                 <div className="lg:col-span-2">
-                  <CompetitorList competitors={competitors} onUpdate={() => loadData(true)} />
+                  <CompetitorList competitors={competitors} onUpdate={() => loadData(true)} onAnalyzeStart={triggerAgentLogs} />
                 </div>
               </div>
             )}

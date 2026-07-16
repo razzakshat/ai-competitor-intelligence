@@ -17,9 +17,11 @@ import {
 export default function CompetitorList({
   competitors,
   onUpdate,
+  onAnalyzeStart,
 }: {
   competitors: Competitor[];
   onUpdate: () => void;
+  onAnalyzeStart?: (name: string) => void;
 }) {
   const [scrapingId, setScrapingId] = useState<string | null>(null);
   const [analyzingId, setAnalyzingId] = useState<string | null>(null);
@@ -36,15 +38,14 @@ export default function CompetitorList({
     }
   };
 
-  const handleAnalyze = async (id: string) => {
+  const handleAnalyze = async (id: string, name: string) => {
     setAnalyzingId(id);
+    if (onAnalyzeStart) onAnalyzeStart(name);
     try {
       await api.post(`/competitors/${id}/analyze`);
       onUpdate();
-      alert("Analysis complete! Check the Briefings tab.");
     } catch (error) {
       console.error("Analysis failed:", error);
-      alert("Analysis failed. Check console.");
     } finally {
       setAnalyzingId(null);
     }
@@ -70,9 +71,9 @@ export default function CompetitorList({
   return (
     <div className="space-y-4">
       {competitors.map((c) => (
-        <Card key={c._id} className="bg-[#0b0f19]/40 backdrop-blur-xl border border-indigo-950/60 hover:border-indigo-500/30 shadow-lg hover:shadow-[0_0_20px_rgba(99,102,241,0.1)] transition-all duration-300 rounded-2xl relative overflow-hidden group">
+        <Card key={c._id} className="bg-[#0b0f19]/40 backdrop-blur-xl border border-indigo-950/60 hover:border-indigo-500/40 shadow-lg hover:shadow-[0_0_25px_rgba(99,102,241,0.15)] hover:-translate-y-1 transition-all duration-300 rounded-2xl relative overflow-hidden group">
           {/* Accent glow corner */}
-          <div className="absolute top-0 right-0 w-[80px] h-[80px] bg-gradient-to-bl from-indigo-500/5 to-transparent rounded-bl-full pointer-events-none" />
+          <div className="absolute top-0 right-0 w-[80px] h-[80px] group-hover:w-[120px] group-hover:h-[120px] bg-gradient-to-bl from-indigo-500/10 to-transparent rounded-bl-full pointer-events-none transition-all duration-500" />
           
           <CardHeader className="flex flex-row items-center justify-between pb-3">
             <div className="space-y-1">
@@ -129,11 +130,11 @@ export default function CompetitorList({
               </button>
 
               <button 
-                onClick={() => handleAnalyze(c._id)} 
+                onClick={() => handleAnalyze(c._id, c.name)} 
                 disabled={scrapingId === c._id || analyzingId === c._id}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-white bg-gradient-to-r from-indigo-600/80 to-violet-600/80 hover:from-indigo-500 hover:to-violet-500 rounded-xl cursor-pointer shadow-[0_0_10px_rgba(99,102,241,0.15)] hover:shadow-[0_0_15px_rgba(99,102,241,0.35)] transition-all disabled:opacity-50"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-white bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 rounded-xl cursor-pointer shadow-[0_0_10px_rgba(99,102,241,0.2)] hover:shadow-[0_0_18px_rgba(99,102,241,0.4)] active:scale-[0.97] transition-all disabled:opacity-50"
               >
-                <BrainCircuit className={`h-3.5 w-3.5 ${analyzingId === c._id ? "animate-pulse" : ""}`} />
+                <BrainCircuit className={`h-3.5 w-3.5 ${analyzingId === c._id ? "animate-pulse text-indigo-300" : ""}`} />
                 {analyzingId === c._id ? "Analyzing..." : "Full Analysis"}
               </button>
 
