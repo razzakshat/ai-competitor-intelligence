@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import AddCompetitorForm from "@/components/AddCompetitorForm";
 import CompetitorList from "@/components/CompetitorList";
 import BriefingList from "@/components/BriefingList";
+import { Badge } from "@/components/ui/badge";
 import { Competitor, Briefing, getCompetitors, getBriefings } from "@/lib/api";
 import { 
   Activity, 
@@ -275,6 +276,80 @@ export default function Dashboard() {
             </div>
           </div>
         </section>
+
+        {/* Workspace Diagnostics Section */}
+        {competitors.length > 0 && (
+          <section className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Left Column: Risk Index Chart */}
+            <div className="bg-[#0b0f19]/40 backdrop-blur-xl border border-indigo-950/60 p-6 rounded-2xl space-y-4 relative group overflow-hidden">
+              <div className="absolute top-0 inset-x-0 h-[1px] bg-gradient-to-r from-transparent via-indigo-500/30 to-transparent" />
+              <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                <TrendingUp className="h-4 w-4 text-indigo-400" />
+                Competitor Threat Vector Index
+              </h3>
+              <div className="space-y-3.5">
+                {competitors.map((comp) => {
+                  const briefs = briefings.filter((b) => b.competitorName === comp.name);
+                  const highCount = briefs.filter((b) => b.significance === "high").length;
+                  const medCount = briefs.filter((b) => b.significance === "medium").length;
+                  const score = Math.min(100, (highCount * 35) + (medCount * 15) + 15);
+                  return (
+                    <div key={comp._id} className="space-y-1.5">
+                      <div className="flex justify-between text-xs font-semibold">
+                        <span className="text-white">{comp.name}</span>
+                        <span className={`font-mono text-[11px] ${
+                          score > 60 ? "text-rose-400" : score > 30 ? "text-amber-400" : "text-indigo-400"
+                        }`}>{score}% Risk Score</span>
+                      </div>
+                      <div className="h-2 w-full bg-slate-950/80 rounded-full overflow-hidden border border-indigo-950/30 p-[1px]">
+                        <div 
+                          className={`h-full rounded-full bg-gradient-to-r transition-all duration-1000 ${
+                            score > 60 
+                              ? "from-rose-500 to-violet-600 shadow-[0_0_10px_rgba(244,63,94,0.3)]" 
+                              : "from-indigo-500 to-violet-500 shadow-[0_0_10px_rgba(99,102,241,0.3)]"
+                          }`}
+                          style={{ width: `${score}%` }}
+                        />
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Right Column: Agent Graph Topology */}
+            <div className="bg-[#0b0f19]/40 backdrop-blur-xl border border-indigo-950/60 p-6 rounded-2xl space-y-4 relative group overflow-hidden">
+              <div className="absolute top-0 inset-x-0 h-[1px] bg-gradient-to-r from-transparent via-violet-500/30 to-transparent" />
+              <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                <BrainCircuit className="h-4 w-4 text-violet-400" />
+                Active Multi-Agent Topology
+              </h3>
+              <div className="space-y-2.5 font-mono text-[10px] sm:text-xs">
+                <div className="flex items-center justify-between p-3 rounded-xl bg-slate-950/40 border border-indigo-950/20 hover:border-indigo-500/20 transition-all">
+                  <div className="flex items-center gap-2">
+                    <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
+                    <span className="text-slate-300 font-semibold">Stealth Web Scraper Node</span>
+                  </div>
+                  <Badge className="bg-emerald-950/40 text-emerald-400 border-emerald-500/20 text-[9px] font-bold">READY</Badge>
+                </div>
+                <div className="flex items-center justify-between p-3 rounded-xl bg-slate-950/40 border border-indigo-950/20 hover:border-indigo-500/20 transition-all">
+                  <div className="flex items-center gap-2">
+                    <span className="h-2 w-2 rounded-full bg-indigo-400 animate-pulse" />
+                    <span className="text-slate-300 font-semibold">Semantic Diffing Analyzer (RAG)</span>
+                  </div>
+                  <Badge className="bg-indigo-950/40 text-indigo-400 border-indigo-500/20 text-[9px] font-bold">MONITORING</Badge>
+                </div>
+                <div className="flex items-center justify-between p-3 rounded-xl bg-slate-950/40 border border-indigo-950/20 hover:border-indigo-500/20 transition-all">
+                  <div className="flex items-center gap-2">
+                    <span className="h-2 w-2 rounded-full bg-violet-400 animate-pulse" />
+                    <span className="text-slate-300 font-semibold">Strategic Decision Advisory Node</span>
+                  </div>
+                  <Badge className="bg-violet-950/40 text-violet-400 border-violet-500/20 text-[9px] font-bold">STANDBY</Badge>
+                </div>
+              </div>
+            </div>
+          </section>
+        )}
 
         {/* Tab Selection */}
         <div className="border-b border-indigo-950/40">
